@@ -58,17 +58,21 @@ AKRESULT WwisperserFX::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkEffectP
     m_pAllocator = in_pAllocator;
     m_pContext = in_pContext;
 
+    m_uNumChannels = in_rFormat.GetNumChannels();
+    m_filter.Init(in_rFormat.uSampleRate, m_pParams->RTPC.uAmount * m_uNumChannels);
     return AK_Success;
 }
 
 AKRESULT WwisperserFX::Term(AK::IAkPluginMemAlloc* in_pAllocator)
 {
+    m_filter.Term();
     AK_PLUGIN_DELETE(in_pAllocator, this);
     return AK_Success;
 }
 
 AKRESULT WwisperserFX::Reset()
 {
+    m_filter.Reset();
     return AK_Success;
 }
 
@@ -83,18 +87,16 @@ AKRESULT WwisperserFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 
 void WwisperserFX::Execute(AkAudioBuffer* io_pBuffer)
 {
-    const AkUInt32 uNumChannels = io_pBuffer->NumChannels();
+    HandleParamsChanged();
+    io_pBuffer->ZeroPadToMaxFrames();
 
-    AkUInt16 uFramesProcessed;
-    for (AkUInt32 i = 0; i < uNumChannels; ++i)
+    for (AkUInt32 uChannel = 0; uChannel < m_uNumChannels; ++uChannel)
     {
-        AkReal32* AK_RESTRICT pBuf = (AkReal32* AK_RESTRICT)io_pBuffer->GetChannel(i);
-
-        uFramesProcessed = 0;
-        while (uFramesProcessed < io_pBuffer->uValidFrames)
+        for (AkUInt32 i = 0; i < m_pParams->RTPC.uAmount; ++i)
         {
-            // Execute DSP in-place here
-            ++uFramesProcessed;
+            m_filter.ProcessChannel(io_pBuffer->GetChannel(uChannel),
+                                    i * m_uNumChannels + uChannel,
+                                    io_pBuffer->uValidFrames);
         }
     }
 }
@@ -102,4 +104,22 @@ void WwisperserFX::Execute(AkAudioBuffer* io_pBuffer)
 AKRESULT WwisperserFX::TimeSkip(AkUInt32 in_uFrames)
 {
     return AK_DataReady;
+}
+
+void WwisperserFX::HandleParamsChanged()
+{
+    const auto pChangeHandler = m_pParams->GetParamChangeHandler();
+
+    if (pChangeHandler->HasChanged(PARAM_AMOUNT_ID))
+    {
+        m_filter.Resize(m_pParams->RTPC.uAmount * m_uNumChannels);
+    }
+    if (pChangeHandler->HasChanged(PARAM_FREQUENCY_ID) || pChangeHandler->HasChanged(PARAM_PINCH_ID))
+    {
+        m_filter.Config(Wpe::AllPass,
+                        m_pParams->RTPC.fFrequency,
+                        m_pParams->RTPC.fPinch,
+                        0.f);
+    }
+    pChangeHandler->ResetAllParamChanges();
 }

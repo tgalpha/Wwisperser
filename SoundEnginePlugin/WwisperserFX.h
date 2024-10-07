@@ -28,6 +28,7 @@ the specific language governing permissions and limitations under the License.
 #define WwisperserFX_H
 
 #include "WwisperserFXParams.h"
+#include "Filter.hpp"
 
 /// See https://www.audiokinetic.com/library/edge/?source=SDK&id=soundengine__plugins__effects.html
 /// for the documentation about effect plug-ins
@@ -62,9 +63,14 @@ public:
     AKRESULT TimeSkip(AkUInt32 in_uFrames) override;
 
 private:
+    void HandleParamsChanged();
+
     WwisperserFXParams* m_pParams;
     AK::IAkPluginMemAlloc* m_pAllocator;
     AK::IAkEffectPluginContext* m_pContext;
+
+    AkUInt32 m_uNumChannels = 0;
+    Wpe::Filter m_filter;
 };
 
 #endif // WwisperserFX_H

@@ -59,8 +59,8 @@ for the documentation about the plugin xml format
               </Restrictions>
             </Property>
             <Property Name="Frequency" Type="Real32" SupportRTPCType="Exclusive"  DisplayName="Frequency">
-              <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="20000" />
-              <DefaultValue>200</DefaultValue>
+              <UserInterface SliderType="4" />
+              <DefaultValue>600</DefaultValue>
               <AudioEnginePropertyID>1</AudioEnginePropertyID>
               <Restrictions>
                 <ValueRestriction>
@@ -73,7 +73,7 @@ for the documentation about the plugin xml format
             </Property>
             <Property Name="Pinch" Type="Real32" SupportRTPCType="Exclusive"  DisplayName="Pinch">
               <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="10" />
-              <DefaultValue>0.707</DefaultValue>
+              <DefaultValue>0.3</DefaultValue>
               <AudioEnginePropertyID>2</AudioEnginePropertyID>
               <Restrictions>
                 <ValueRestriction>

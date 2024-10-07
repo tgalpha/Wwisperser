@@ -33,18 +33,19 @@ description = [
 [parameters.defines.frequency]
 type = 'float'
 rtpc_type = 'Exclusive'
-default_value = 200
+default_value = 600
 min_value = 20
 max_value = 20000
 description = [
     { language = 'en', text = 'The frequency of the filter' },
     { language = 'zh', text = '滤波器的频率' }
 ]
+user_interface = 'SliderType="4"'
 
 [parameters.defines.pinch]
 type = 'float'
 rtpc_type = 'Exclusive'
-default_value = 0.707
+default_value = 0.3
 min_value = 0.01
 max_value = 10
 description = [

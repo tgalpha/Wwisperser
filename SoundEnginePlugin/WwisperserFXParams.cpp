@@ -57,8 +57,8 @@ AKRESULT WwisperserFXParams::Init(AK::IAkPluginMemAlloc* in_pAllocator, const vo
         // Initialize default parameters here
         // [ParameterInitialization]
         RTPC.uAmount = 0;
-        RTPC.fFrequency = 200;
-        RTPC.fPinch = 0.707;
+        RTPC.fFrequency = 600;
+        RTPC.fPinch = 0.3;
         // [/ParameterInitialization]
         m_paramChangeHandler.SetAllParamChanges();
         return AK_Success;

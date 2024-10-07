@@ -62,6 +62,12 @@ Plugin.sdk.static.libdirs = -- https://github.com/premake/premake-core/wiki/libd
 Plugin.sdk.static.defines = -- https://github.com/premake/premake-core/wiki/defines
 {
 }
+Plugin.sdk.static.custom = function()
+    filter "system:windows"
+        links { "" }
+    filter "system:linux"
+        links { "" }
+end
 
 -- SDK SHARED PLUGIN SECTION
 Plugin.sdk.shared.includedirs =
