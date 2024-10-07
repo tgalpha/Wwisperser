@@ -23,6 +23,7 @@ the specific language governing permissions and limitations under the License.
 
   Copyright (c) 2021 Audiokinetic Inc.
 *******************************************************************************/
+// [wp-enhanced template] **Do not delete this line**
 
 #include "WwisperserFXParams.h"
 
@@ -38,6 +39,7 @@ WwisperserFXParams::~WwisperserFXParams()
 
 WwisperserFXParams::WwisperserFXParams(const WwisperserFXParams& in_rParams)
 {
+    InnerType = in_rParams.InnerType;
     RTPC = in_rParams.RTPC;
     NonRTPC = in_rParams.NonRTPC;
     m_paramChangeHandler.SetAllParamChanges();
@@ -53,7 +55,11 @@ AKRESULT WwisperserFXParams::Init(AK::IAkPluginMemAlloc* in_pAllocator, const vo
     if (in_ulBlockSize == 0)
     {
         // Initialize default parameters here
-        RTPC.fPlaceholder = 0.0f;
+        // [ParameterInitialization]
+        RTPC.uAmount = 0;
+        RTPC.fFrequency = 200;
+        RTPC.fPinch = 0.707;
+        // [/ParameterInitialization]
         m_paramChangeHandler.SetAllParamChanges();
         return AK_Success;
     }
@@ -73,7 +79,11 @@ AKRESULT WwisperserFXParams::SetParamsBlock(const void* in_pParamsBlock, AkUInt3
     AkUInt8* pParamsBlock = (AkUInt8*)in_pParamsBlock;
 
     // Read bank data here
-    RTPC.fPlaceholder = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    // [ReadBankData]
+    RTPC.uAmount = READBANKDATA(AkUInt32, pParamsBlock, in_ulBlockSize);
+    RTPC.fFrequency = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.fPinch = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    // [/ReadBankData]
     CHECKBANKDATASIZE(in_ulBlockSize, eResult);
     m_paramChangeHandler.SetAllParamChanges();
 
@@ -87,10 +97,20 @@ AKRESULT WwisperserFXParams::SetParam(AkPluginParamID in_paramID, const void* in
     // Handle parameter change here
     switch (in_paramID)
     {
-    case PARAM_PLACEHOLDER_ID:
-        RTPC.fPlaceholder = *((AkReal32*)in_pValue);
-        m_paramChangeHandler.SetParamChange(PARAM_PLACEHOLDER_ID);
+    // [SetParameters]
+    case PARAM_AMOUNT_ID:
+        RTPC.uAmount = static_cast<AkUInt32>(*(AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_AMOUNT_ID);
         break;
+    case PARAM_FREQUENCY_ID:
+        RTPC.fFrequency = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_FREQUENCY_ID);
+        break;
+    case PARAM_PINCH_ID:
+        RTPC.fPinch = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_PINCH_ID);
+        break;
+    // [/SetParameters]
     default:
         eResult = AK_InvalidParameter;
         break;

@@ -19,49 +19,35 @@ CanBeInsertOnAudioObjects = true
 CanBeRendered = true
 
 
-[parameters.defines.bool_param_as_checkbox]
-type = 'bool'
-default_value = true
-
-
-[parameters.defines.int_param_as_combo_box] # snake_case_name
-# int/float/bool are supported
-type = 'int'
-# Additive/Multiplicative/Exclusive/Boolean are supported
+[parameters.defines.amount]
+type = 'uint'
 rtpc_type = 'Exclusive'
 default_value = 0
-
-# Fields below are optional
-# Description displayed in Wwise UI. Refer to: https://www.audiokinetic.com/zh/library/edge/?source=SDK&id=effectplugin_tools_property_help.html
+min_value = 0
+max_value = 64
 description = [
-    { language = 'en', text = 'This is a description for this parameter' },
-    { language = 'zh', text = '这是一个参数的描述' }
-]
-# Name displayed in Wwise UI, default to auto generate title from snake_case_name. e.g. en_US => en US, this_is_title => This is Title
-display_name = 'Int Parameter as Combo Box'
-# Only effective when type is 'int'
-enumeration = [
-    { displayName = 'Option 1', value = 0 },
-    { displayName = 'Option 2', value = 1 },
-]
-# Conditions for enabling parameter editing
-dependencies = [
-    { name = 'bool_param_as_checkbox', condition = 'Enumeration', values = [true] },
+    { language = 'en', text = 'Adjusts how pronounced the effect is by increasing the order of the all-pass filter' },
+    { language = 'zh', text = '通过增加全通滤波器的阶数来调整效果的明显程度' }
 ]
 
-
-[parameters.defines.float_param_as_slider]
+[parameters.defines.frequency]
 type = 'float'
 rtpc_type = 'Exclusive'
-# Optional, Refer to `DataMeaning` section in: https://www.audiokinetic.com/zh/library/edge/?source=SDK&id=plugin_xml_properties.html
-data_meaning = 'Decibels'
-default_value = 0
-min_value = -96
-max_value = 24
-
+default_value = 200
+min_value = 20
+max_value = 20000
 description = [
-    { language = 'en', text = 'This is a description for this parameter' },
-    { language = 'zh', text = '这是一个参数的描述' }
+    { language = 'en', text = 'The frequency of the filter' },
+    { language = 'zh', text = '滤波器的频率' }
 ]
-# Refer to: https://www.audiokinetic.com/zh/library/edge/?source=SDK&id=plugin_xml_properties.html
-user_interface = 'SliderType="6" Step="0.1" Fine="0.01" Decimals="2"'
+
+[parameters.defines.pinch]
+type = 'float'
+rtpc_type = 'Exclusive'
+default_value = 0.707
+min_value = 0.01
+max_value = 10
+description = [
+    { language = 'en', text = 'The Q setting of the filter, which will have the effect of concentrating the delay around the frequency' },
+    { language = 'zh', text = '滤波器的Q值，它将会使延迟集中在频率附近' }
+]

@@ -28,32 +28,63 @@ the specific language governing permissions and limitations under the License.
 See https://www.audiokinetic.com/library/edge/?source=SDK&id=plugin__xml.html
 for the documentation about the plugin xml format
 -->
+<!-- [wp-enhanced template] **Do not delete this line** -->
 <PluginModule>
-  <EffectPlugin Name="Wwisperser" CompanyID="64" PluginID="15944">
-    <PluginInfo>
-      <PlatformSupport>
-        <Platform Name="Any">
-          <CanBeInsertOnBusses>true</CanBeInsertOnBusses>
-          <CanBeInsertOnAudioObjects>true</CanBeInsertOnAudioObjects>
-          <CanBeRendered>true</CanBeRendered>
-        </Platform>
-      </PlatformSupport>
-    </PluginInfo>
-    <Properties>
-      <!-- Add your property definitions here -->
-      <Property Name="Placeholder" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Placeholder">
-        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="10" />
-        <DefaultValue>0.0</DefaultValue>
-        <AudioEnginePropertyID>0</AudioEnginePropertyID>
-        <Restrictions>
-          <ValueRestriction>
-            <Range Type="Real32">
-              <Min>0.001</Min>
-              <Max>1000</Max>
-            </Range>
-          </ValueRestriction>
-        </Restrictions>
-      </Property>
-    </Properties>
-  </EffectPlugin>
+    <EffectPlugin Name="Wwisperser" CompanyID="64" PluginID="15944">
+        <!-- [PluginInfo] -->
+        <PluginInfo MenuPath="custom">
+          <PlatformSupport>
+            <Platform Name="Any">
+              <CanBeInsertOnBusses>true</CanBeInsertOnBusses>
+              <CanBeInsertOnAudioObjects>true</CanBeInsertOnAudioObjects>
+              <CanBeRendered>true</CanBeRendered>
+            </Platform>
+          </PlatformSupport>
+        </PluginInfo>
+        <!-- [/PluginInfo] -->
+        <Properties>
+            <!-- Add your property definitions here -->
+            <!-- [ParameterGui] -->
+            <Property Name="Amount" Type="Uint32" SupportRTPCType="Exclusive"  DisplayName="Amount">
+              <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="64" />
+              <DefaultValue>0</DefaultValue>
+              <AudioEnginePropertyID>0</AudioEnginePropertyID>
+              <Restrictions>
+                <ValueRestriction>
+                  <Range Type="Uint32">
+                    <Min>0</Min>
+                    <Max>64</Max>
+                  </Range>
+                </ValueRestriction>
+              </Restrictions>
+            </Property>
+            <Property Name="Frequency" Type="Real32" SupportRTPCType="Exclusive"  DisplayName="Frequency">
+              <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="20000" />
+              <DefaultValue>200</DefaultValue>
+              <AudioEnginePropertyID>1</AudioEnginePropertyID>
+              <Restrictions>
+                <ValueRestriction>
+                  <Range Type="Real32">
+                    <Min>20</Min>
+                    <Max>20000</Max>
+                  </Range>
+                </ValueRestriction>
+              </Restrictions>
+            </Property>
+            <Property Name="Pinch" Type="Real32" SupportRTPCType="Exclusive"  DisplayName="Pinch">
+              <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="10" />
+              <DefaultValue>0.707</DefaultValue>
+              <AudioEnginePropertyID>2</AudioEnginePropertyID>
+              <Restrictions>
+                <ValueRestriction>
+                  <Range Type="Real32">
+                    <Min>0.01</Min>
+                    <Max>10</Max>
+                  </Range>
+                </ValueRestriction>
+              </Restrictions>
+            </Property>
+            <!-- [/ParameterGui] -->
+        </Properties>
+    </EffectPlugin>
 </PluginModule>

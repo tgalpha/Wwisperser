@@ -23,6 +23,7 @@ the specific language governing permissions and limitations under the License.
 
   Copyright (c) 2021 Audiokinetic Inc.
 *******************************************************************************/
+// [wp-enhanced template] **Do not delete this line**
 
 #ifndef WwisperserFXParams_H
 #define WwisperserFXParams_H
@@ -32,16 +33,35 @@ the specific language governing permissions and limitations under the License.
 
 // Add parameters IDs here, those IDs should map to the AudioEnginePropertyID
 // attributes in the xml property definition.
-static const AkPluginParamID PARAM_PLACEHOLDER_ID = 0;
-static const AkUInt32 NUM_PARAMS = 1;
+// [ParameterID]
+static constexpr AkPluginParamID PARAM_AMOUNT_ID = 0;
+static constexpr AkPluginParamID PARAM_FREQUENCY_ID = 1;
+static constexpr AkPluginParamID PARAM_PINCH_ID = 2;
+static constexpr AkUInt32 NUM_PARAMS = 3;
+// [/ParameterID]
+
+// [InnerTypes]
+// [/InnerTypes]
+
+struct WwisperserInnerTypeParams
+{
+    // [InnerTypeDeclaration]
+    // [/InnerTypeDeclaration]
+};
 
 struct WwisperserRTPCParams
 {
-    AkReal32 fPlaceholder;
+    // [RTPCDeclaration]
+    AkUInt32 uAmount;
+    AkReal32 fFrequency;
+    AkReal32 fPinch;
+    // [/RTPCDeclaration]
 };
 
 struct WwisperserNonRTPCParams
 {
+    // [NonRTPCDeclaration]
+    // [/NonRTPCDeclaration]
 };
 
 struct WwisperserFXParams
@@ -68,10 +88,14 @@ struct WwisperserFXParams
     /// Update a single parameter at a time and perform the necessary actions on the parameter changes.
     AKRESULT SetParam(AkPluginParamID in_paramID, const void* in_pValue, AkUInt32 in_ulParamSize) override;
 
-    AK::AkFXParameterChangeHandler<NUM_PARAMS> m_paramChangeHandler;
+    AK::AkFXParameterChangeHandler<NUM_PARAMS>* GetParamChangeHandler() { return &m_paramChangeHandler; }
 
+    WwisperserInnerTypeParams InnerType;
     WwisperserRTPCParams RTPC;
     WwisperserNonRTPCParams NonRTPC;
+
+private:
+    AK::AkFXParameterChangeHandler<NUM_PARAMS> m_paramChangeHandler;
 };
 
 #endif // WwisperserFXParams_H

@@ -23,9 +23,16 @@ the specific language governing permissions and limitations under the License.
 
   Copyright (c) 2021 Audiokinetic Inc.
 *******************************************************************************/
+// [wp-enhanced template] **Do not delete this line**
 
 #include "WwisperserPlugin.h"
 #include "../SoundEnginePlugin/WwisperserFXFactory.h"
+
+// [PropertyNames]
+const char* const szAmount = "Amount";
+const char* const szFrequency = "Frequency";
+const char* const szPinch = "Pinch";
+// [/PropertyNames]
 
 WwisperserPlugin::WwisperserPlugin()
 {
@@ -38,7 +45,11 @@ WwisperserPlugin::~WwisperserPlugin()
 bool WwisperserPlugin::GetBankParameters(const GUID & in_guidPlatform, AK::Wwise::Plugin::DataWriter& in_dataWriter) const
 {
     // Write bank data here
-    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, "Placeholder"));
+    // [WriteBankData]
+    in_dataWriter.WriteUInt32(m_propertySet.GetUInt32(in_guidPlatform, szAmount));
+    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, szFrequency));
+    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, szPinch));
+    // [/WriteBankData]
 
     return true;
 }
