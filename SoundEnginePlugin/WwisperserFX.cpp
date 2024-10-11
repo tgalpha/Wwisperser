@@ -26,6 +26,7 @@ the specific language governing permissions and limitations under the License.
 
 #include "WwisperserFX.h"
 #include "../WwisperserConfig.h"
+#include <AK/DSP/AkApplyGain.h>
 
 #include <AK/AkWwiseSDKVersion.h>
 
@@ -59,6 +60,7 @@ AKRESULT WwisperserFX::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkEffectP
     m_pContext = in_pContext;
 
     m_uNumChannels = in_rFormat.GetNumChannels();
+    m_uPrevAmount = m_pParams->RTPC.uAmount;
     m_filter.Init(in_rFormat.uSampleRate, m_pParams->RTPC.uAmount * m_uNumChannels);
     return AK_Success;
 }
@@ -80,46 +82,62 @@ AKRESULT WwisperserFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 {
     out_rPluginInfo.eType = AkPluginTypeEffect;
     out_rPluginInfo.bIsInPlace = true;
-	out_rPluginInfo.bCanProcessObjects = false;
+    out_rPluginInfo.bCanProcessObjects = false;
     out_rPluginInfo.uBuildVersion = AK_WWISESDK_VERSION_COMBINED;
     return AK_Success;
 }
 
 void WwisperserFX::Execute(AkAudioBuffer* io_pBuffer)
 {
-    HandleParamsChanged();
+    ExecuteSession session(this);
     io_pBuffer->ZeroPadToMaxFrames();
+
+     if (m_uPrevAmount == m_pParams->RTPC.uAmount)
+    {
+        for (AkUInt32 uChannel = 0; uChannel < m_uNumChannels; ++uChannel)
+        {
+            for (AkUInt32 i = 0; i < m_pParams->RTPC.uAmount; ++i)
+            {
+                m_filter.ProcessChannel(io_pBuffer->GetChannel(uChannel),
+                                        i * m_uNumChannels + uChannel,
+                                        io_pBuffer->uValidFrames);
+            }
+        }
+        return;
+    }
+
+    // When amount changes, we need to cross-fade between the old and new amount.
+    auto bAmountIncreased = m_uPrevAmount < m_pParams->RTPC.uAmount;
+    auto uSmallerAmount = bAmountIncreased ? m_uPrevAmount : m_pParams->RTPC.uAmount;
+    auto uLargerAmount = bAmountIncreased ? m_pParams->RTPC.uAmount : m_uPrevAmount;
+    auto pfTemp = (AkSampleType*)AkAlloca(io_pBuffer->uValidFrames * sizeof(AkSampleType));
+    m_filter.Resize(uLargerAmount * m_uNumChannels);
 
     for (AkUInt32 uChannel = 0; uChannel < m_uNumChannels; ++uChannel)
     {
-        for (AkUInt32 i = 0; i < m_pParams->RTPC.uAmount; ++i)
+        const auto pBuf = io_pBuffer->GetChannel(uChannel);
+        for (AkUInt32 i = 0; i < uSmallerAmount; ++i)
         {
-            m_filter.ProcessChannel(io_pBuffer->GetChannel(uChannel),
+            m_filter.ProcessChannel(pBuf,
                                     i * m_uNumChannels + uChannel,
                                     io_pBuffer->uValidFrames);
         }
+
+        AKPLATFORM::AkMemCpy(pfTemp, pBuf, io_pBuffer->uValidFrames * sizeof(AkSampleType));
+        for (AkUInt32 i = uSmallerAmount; i < uLargerAmount; ++i)
+        {
+            m_filter.ProcessChannel(pfTemp,
+                                    i * m_uNumChannels + uChannel,
+                                    io_pBuffer->uValidFrames);
+        }
+        auto pFadeOut = bAmountIncreased ? pBuf : pfTemp;
+        auto pFadeIn = bAmountIncreased ? pfTemp : pBuf;
+        Wpe::Crossfade(pFadeOut, pFadeIn, pBuf, io_pBuffer->uValidFrames);
     }
+    m_filter.Resize(m_pParams->RTPC.uAmount * m_uNumChannels);
 }
 
 AKRESULT WwisperserFX::TimeSkip(AkUInt32 in_uFrames)
 {
     return AK_DataReady;
-}
-
-void WwisperserFX::HandleParamsChanged()
-{
-    const auto pChangeHandler = m_pParams->GetParamChangeHandler();
-
-    if (pChangeHandler->HasChanged(PARAM_AMOUNT_ID))
-    {
-        m_filter.Resize(m_pParams->RTPC.uAmount * m_uNumChannels);
-    }
-    if (pChangeHandler->HasChanged(PARAM_FREQUENCY_ID) || pChangeHandler->HasChanged(PARAM_PINCH_ID))
-    {
-        m_filter.Config(Wpe::AllPass,
-                        m_pParams->RTPC.fFrequency,
-                        m_pParams->RTPC.fPinch,
-                        0.f);
-    }
-    pChangeHandler->ResetAllParamChanges();
 }

@@ -63,13 +63,39 @@ public:
     AKRESULT TimeSkip(AkUInt32 in_uFrames) override;
 
 private:
-    void HandleParamsChanged();
+    struct ExecuteSession
+    {
+        ExecuteSession(WwisperserFX* pFX)
+        {
+            m_pFX = pFX;
+            m_pParameterChangeHandler = pFX->m_pParams->GetParamChangeHandler();
+
+            if (m_pParameterChangeHandler->HasChanged(PARAM_FREQUENCY_ID) || m_pParameterChangeHandler->HasChanged(PARAM_PINCH_ID))
+            {
+                pFX->m_filter.Config(Wpe::AllPass,
+                                     pFX->m_pParams->RTPC.fFrequency,
+                                     pFX->m_pParams->RTPC.fPinch,
+                                     0.f);
+            }
+        }
+
+        ~ExecuteSession()
+        {
+            m_pFX->m_uPrevAmount = m_pFX->m_pParams->RTPC.uAmount;
+            m_pParameterChangeHandler->ResetAllParamChanges();
+        }
+
+    private:
+        WwisperserFX* m_pFX;
+        AK::AkFXParameterChangeHandler<NUM_PARAMS>* m_pParameterChangeHandler;
+    };
 
     WwisperserFXParams* m_pParams;
     AK::IAkPluginMemAlloc* m_pAllocator;
     AK::IAkEffectPluginContext* m_pContext;
 
     AkUInt32 m_uNumChannels = 0;
+    AkUInt32 m_uPrevAmount = 0;
     Wpe::Filter m_filter;
 };
 
